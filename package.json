@@ -19,5 +19,8 @@
   "homepage": "https://github.com/BartekPietrzyk/reunion#readme",
   "devDependencies": {
     "gh-pages": "^6.3.0"
+  },
+  "dependencies": {
+    "firebase": "^12.2.1"
   }
 }

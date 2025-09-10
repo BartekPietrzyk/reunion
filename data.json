@@ -1,0 +1,39 @@
+{
+  "pollOptions": {
+    "region": {
+      "0": "Północny-Zachód",
+      "1": "Północ",
+      "2": "Północny-Wschód",
+      "3": "Zachód",
+      "4": "Centrum",
+      "5": "Wschód",
+      "6": "Południowy-Zachód",
+      "7": "Południe",
+      "8": "Południowy-Wschód"
+    },
+    "weekend": {
+      "0": "3-5 Października",
+      "1": "10-12 Października",
+      "2": "17-19 Października",
+      "3": "24-26 Października",
+      "4": "31 Października-2 Listopada",
+      "5": "7-9 Listopada",
+      "6": "14-16 Listopada",
+      "7": "21-23 Listopada",
+      "8": "28-30 Listopada"
+    },
+    "price": {
+      "0": "do 100 zł",
+      "1": "100-200 zł",
+      "2": "200-300 zł",
+      "3": "powyżej 300 zł"
+    },
+    "type": {
+      "0": "Hotel",
+      "1": "Domek",
+      "2": "Agroturystyka",
+      "3": "Namiot",
+      "4": "Las"
+    }
+  }
+}
