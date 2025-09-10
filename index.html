@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zjazd Przyjaciół - Planer Miejscówki i Ankiety</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f5f5f4;
+            font-family: 'Inter', sans-serif;
+        }
+        .region-btn.active, .vote-btn.active, .date-btn.active, .price-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-stone-800">Zjazd Przyjaciół po Latach</h1>
+            <p class="text-lg text-stone-600 mt-2">Interaktywny planer, który pomoże nam wybrać idealne miejsce na spotkanie!</p>
+            <div id="auth-status" class="mt-4 p-2 text-sm text-stone-500 bg-stone-100 rounded-lg">Ładowanie...</div>
+        </header>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold text-center text-stone-700 mb-4">Mapa Propozycji</h2>
+            <p class="text-center text-stone-500 mb-6">Polska została podzielona na 9 regionów. Kliknij na dowolny z nich, aby zobaczyć dwie propozycje hoteli, które spełniają nasze kryteria: mogą pomieścić 12 osób, oferują dobre jedzenie i miłą atmosferę. Każda propozycja zawiera wycenę weekendowego pobytu.</p>
+            <div id="region-grid" class="grid grid-cols-3 gap-2 sm:gap-4">
+                <!-- Przyciski regionów będą generowane przez JavaScript -->
+            </div>
+        </div>
+
+        <div id="details-container">
+             <div class="text-center p-8 bg-white rounded-2xl shadow-lg">
+                <svg class="mx-auto h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+                <h3 class="mt-2 text-xl font-medium text-gray-900">Wybierz region</h3>
+                <p class="mt-1 text-stone-500">Kliknij na mapie, aby zobaczyć szczegóły propozycji.</p>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-center text-stone-700 mb-4">Ankieta Wyboru Regionu</h2>
+            <p class="text-center text-stone-500 mb-6">Oddaj swój głos na ulubione regiony (możesz wybrać więcej niż jeden).</p>
+            
+            <form id="region-vote-form" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="voter-name-region" class="font-medium text-stone-700 mb-1">Twoje imię:</label>
+                    <input type="text" id="voter-name-region" class="p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Wprowadź swoje imię" required>
+                </div>
+                
+                <div class="flex flex-col">
+                    <label class="font-medium text-stone-700 mb-1">Wybierz region(y):</label>
+                    <div id="vote-region-buttons" class="grid grid-cols-3 gap-2">
+                        <!-- Przyciski do głosowania będą generowane przez JS -->
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button type="submit" id="submit-region-vote-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        Wyślij Głos
+                    </button>
+                </div>
+                <p id="region-vote-message" class="text-center text-sm font-semibold mt-2"></p>
+            </form>
+
+            <form id="add-region-form" class="mt-4 flex flex-col space-y-2">
+                <label for="new-region-name" class="font-medium text-stone-700 mb-1">Dodaj nowy region do ankiety:</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="new-region-name" class="flex-grow p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Nazwa regionu" required>
+                    <button type="submit" id="add-region-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        Dodaj
+                    </button>
+                </div>
+                <p id="add-region-message" class="text-center text-sm font-semibold mt-1"></p>
+            </form>
+            
+            <div id="region-results-container" class="mt-8">
+                <h3 class="text-xl font-semibold text-stone-700 mb-4 text-center">Aktualne Wyniki Głosowania na Region</h3>
+                <div id="region-vote-results" class="bg-stone-50 p-4 rounded-lg shadow-inner">
+                    <p class="text-center text-stone-500">Brak oddanych głosów. Bądź pierwszy!</p>
+                </div>
+            </div>
+
+            <!-- Panel do resetowania -->
+            <div class="mt-6 border-t pt-6 border-stone-200">
+                <h4 class="text-lg font-semibold text-stone-700 mb-3">Zresetuj Ankietę</h4>
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <input type="password" id="region-reset-code" class="w-full sm:w-1/3 p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400" placeholder="Kod resetujący">
+                    <button id="reset-region-btn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        Zresetuj
+                    </button>
+                </div>
+                <p id="region-reset-message" class="text-center text-sm font-semibold mt-2"></p>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-center text-stone-700 mb-4">Ankieta Wyboru Terminu</h2>
+            <p class="text-center text-stone-500 mb-6">Wybierz weekend(y), który(e) najbardziej Ci odpowiadają na zjazd (możesz wybrać więcej niż jeden).</p>
+
+            <form id="weekend-vote-form" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="voter-name-weekend" class="font-medium text-stone-700 mb-1">Twoje imię:</label>
+                    <input type="text" id="voter-name-weekend" class="p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Wprowadź swoje imię" required>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-medium text-stone-700 mb-1">Wybierz termin(y):</label>
+                    <div id="vote-weekend-buttons" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        <!-- Przyciski terminów będą generowane przez JS -->
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <button type="submit" id="submit-weekend-vote-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        Wyślij Głos
+                    </button>
+                </div>
+                <p id="weekend-vote-message" class="text-center text-sm font-semibold mt-2"></p>
+            </form>
+
+            <form id="add-weekend-form" class="mt-4 flex flex-col space-y-2">
+                <label for="new-weekend-name" class="font-medium text-stone-700 mb-1">Dodaj nowy termin do ankiety:</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="new-weekend-name" class="flex-grow p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="np. 1-3 Grudnia" required>
+                    <button type="submit" id="add-weekend-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        Dodaj
+                    </button>
+                </div>
+                <p id="add-weekend-message" class="text-center text-sm font-semibold mt-1"></p>
+            </form>
+
+            <div id="weekend-results-container" class="mt-8">
+                <h3 class="text-xl font-semibold text-stone-700 mb-4 text-center">Aktualne Wyniki Głosowania na Termin</h3>
+                <div id="weekend-vote-results" class="bg-stone-50 p-4 rounded-lg shadow-inner">
+                    <p class="text-center text-stone-500">Brak oddanych głosów. Bądź pierwszy!</p>
+                </div>
+            </div>
+
+            <!-- Panel do resetowania -->
+            <div class="mt-6 border-t pt-6 border-stone-200">
+                <h4 class="text-lg font-semibold text-stone-700 mb-3">Zresetuj Ankietę</h4>
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <input type="password" id="weekend-reset-code" class="w-full sm:w-1/3 p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400" placeholder="Kod resetujący">
+                    <button id="reset-weekend-btn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        Zresetuj
+                    </button>
+                </div>
+                <p id="weekend-reset-message" class="text-center text-sm font-semibold mt-2"></p>
+            </div>
+        </div>
+        
+        <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-center text-stone-700 mb-4">Ankieta Wyboru Ceny</h2>
+            <p class="text-center text-stone-500 mb-6">Oddaj swój głos na preferowane przedziały cenowe za nocleg (za osobę, za dobę) (możesz wybrać więcej niż jeden).</p>
+
+            <form id="price-vote-form" class="space-y-4">
+                <div class="flex flex-col">
+                    <label for="voter-name-price" class="font-medium text-stone-700 mb-1">Twoje imię:</label>
+                    <input type="text" id="voter-name-price" class="p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Wprowadź swoje imię" required>
+                </div>
+                
+                <div class="flex flex-col">
+                    <label class="font-medium text-stone-700 mb-1">Wybierz przedział(y) cenowe:</label>
+                    <div id="vote-price-buttons" class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <!-- Przyciski cenowe będą generowane przez JS -->
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button type="submit" id="submit-price-vote-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                        Wyślij Głos
+                    </button>
+                </div>
+                <p id="price-vote-message" class="text-center text-sm font-semibold mt-2"></p>
+            </form>
+
+            <form id="add-price-form" class="mt-4 flex flex-col space-y-2">
+                <label for="new-price-name" class="font-medium text-stone-700 mb-1">Dodaj nowy przedział cenowy do ankiety:</label>
+                <div class="flex space-x-2">
+                    <input type="text" id="new-price-name" class="flex-grow p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="np. 350-400 zł" required>
+                    <button type="submit" id="add-price-btn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        Dodaj
+                    </button>
+                </div>
+                <p id="add-price-message" class="text-center text-sm font-semibold mt-1"></p>
+            </form>
+
+            <div id="price-results-container" class="mt-8">
+                <h3 class="text-xl font-semibold text-stone-700 mb-4 text-center">Aktualne Wyniki Głosowania na Cenę</h3>
+                <div id="price-vote-results" class="bg-stone-50 p-4 rounded-lg shadow-inner">
+                    <p class="text-center text-stone-500">Brak oddanych głosów. Bądź pierwszy!</p>
+                </div>
+            </div>
+
+            <!-- Panel do resetowania -->
+            <div class="mt-6 border-t pt-6 border-stone-200">
+                <h4 class="text-lg font-semibold text-stone-700 mb-3">Zresetuj Ankietę</h4>
+                <div class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <input type="password" id="price-reset-code" class="w-full sm:w-1/3 p-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400" placeholder="Kod resetujący">
+                    <button id="reset-price-btn" class="w-full sm:w-auto bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        Zresetuj
+                    </button>
+                </div>
+                <p id="price-reset-message" class="text-center text-sm font-semibold mt-2"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, addDoc, onSnapshot, collection, query, where, getDocs, setDoc, serverTimestamp, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        setLogLevel('debug');
+
+        const hotelData = {
+            'nw': { name: 'Północny-Zachód', hotels: [ /* ... dane hoteli ... */ ] },
+            'n': { name: 'Północ', hotels: [ /* ... dane hoteli ... */ ] },
+            'ne': { name: 'Północny-Wschód', hotels: [ /* ... dane hoteli ... */ ] },
+            'w': { name: 'Zachód', hotels: [ /* ... dane hoteli ... */ ] },
+            'c': { name: 'Centrum', hotels: [ /* ... dane hoteli ... */ ] },
+            'e': { name: 'Wschód', hotels: [ /* ... dane hoteli ... */ ] },
+            'sw': { name: 'Południowy-Zachód', hotels: [ /* ... dane hoteli ... */ ] },
+            's': { name: 'Południe', hotels: [ /* ... dane hoteli ... */ ] },
+            'se': { name: 'Południowy-Wschód', hotels: [ /* ... dane hoteli ... */ ] }
+        };
+
+        let weekendDates = [
+            '3-5 Października', '10-12 Października', '17-19 Października', '24-26 Października',
+            '31 Października-2 Listopada', '7-9 Listopada', '14-16 Listopada', '21-23 Listopada', '28-30 Listopada'
+        ];
+        
+        let priceRanges = [
+            'do 100 zł',
+            '100-200 zł',
+            '200-300 zł',
+            'powyżej 300 zł'
+        ];
+
+        let regionOptions = Object.values(hotelData).map(region => region.name);
+        
+        // Dane hoteli, uzupełnione o precyzyjne linki do Google Maps
+        hotelData['nw'].hotels[0] = { name: 'Hotel Orle Gniazdo, Szczyrk', desc: 'Położony w sercu Beskidów...', priceSingle: 'ok. 9 600 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 325 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Orle+Gniazdo+Szczyrk/@49.696666,19.006903,17z/data=!3m1!4b1!4m9!3m8!1s0x47141527e5b2046f:0xc6d79e51c6c8c1c5!5m2!4m1!1i2!8m2!3d49.696666!4d19.006903!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['nw'].hotels[1] = { name: 'Pałac Ciekocinko Hotel Resort & Wellness', desc: 'Luksusowy wypoczynek w butikowym hotelu...', priceSingle: 'ok. 11 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 383 PLN', googleMapsLink: 'https://www.google.com/maps/place/Pa%C5%82ac+Ciekocinko/@54.672834,17.925409,17z/data=!3m1!4b1!4m9!3m8!1s0x470c915f7936a7a3:0xebcf6944062f6b80!5m2!4m1!1i2!8m2!3d54.672834!4d17.925409!16s%2Fg%2F1tdw1v48?entry=ttu' };
+        hotelData['n'].hotels[0] = { name: 'Hotel Aubrecht, Kaszuby', desc: 'Elegancki hotel nad jeziorem...', priceSingle: 'ok. 10 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 350 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Aubrecht/@53.696515,17.294155,17z/data=!3m1!4b1!4m9!3m8!1s0x470213d8d6d67e3f:0xa1d52033c4f74d61!5m2!4m1!1i2!8m2!3d53.696515!4d17.294155!16s%2Fg%2F1td48b23?entry=ttu' };
+        hotelData['n'].hotels[1] = { name: 'Hotel Mikołajki, Mazury', desc: 'Położony na Ptasiej Wyspie...', priceSingle: 'ok. 10 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 371 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Miko%C5%82ajki+Leisure+%26+SPA/@53.80373,21.57946,17z/data=!3m1!4b1!4m9!3m8!1s0x471df42f7c0337c7:0x50774780521e16f3!5m2!4m1!1i2!8m2!3d53.80373!4d21.57946!16s%2Fg%2F1hc5m3t0w?entry=ttu' };
+        hotelData['ne'].hotels[0] = { name: 'Hotel Żubrówka, Białowieża', desc: 'Bezpośrednie sąsiedztwo Puszczy Białowieskiej...', priceSingle: 'ok. 8 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 296 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+%C5%BBubr%C3%B3wka/@52.70425,23.85698,17z/data=!3m1!4b1!4m9!3m8!1s0x472149b8032d8471:0x51c70e281d3f9f9d!5m2!4m1!1i2!8m2!3d52.70425!4d23.85698!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['ne'].hotels[1] = { name: 'Dwór Kaliszki, Mazury', desc: 'Zabytkowy dworek z duszą...', priceSingle: 'ok. 9 300 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 500 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 313 PLN', googleMapsLink: 'https://www.google.com/maps/place/Dw%C3%B3r+Kaliszki/@53.757056,21.821033,17z/data=!3m1!4b1!4m9!3m8!1s0x471d2b7d4d4f826d:0x347c09d57a2c7e0e!5m2!4m1!1i2!8m2!3d53.757056!4d21.821033!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['w'].hotels[0] = { name: 'Pałac Mierzęcin Wellness & Wine Resort', desc: 'Połączenie luksusowego spa z winnicą...', priceSingle: 'ok. 11 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 375 PLN', googleMapsLink: 'https://www.google.com/maps/place/Pa%C5%82ac+Mierzecin+Wellness+%26+Wine+Resort/@52.930462,15.93988,17z/data=!3m1!4b1!4m9!3m8!1s0x470c1e8d4a6f9a01:0x867b1b3b1c67d32c!5m2!4m1!1i2!8m2!3d52.930462!4d15.93988!16s%2Fg%2F1tdw1v48?entry=ttu' };
+        hotelData['w'].hotels[1] = { name: 'Hotel Remes, Opalenica', desc: 'Nowoczesny kompleks sportowo-rekreacyjny...', priceSingle: 'ok. 9 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 700 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 321 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Remes/@52.338779,16.517316,17z/data=!3m1!4b1!4m9!3m8!1s0x47042a9d8c0b5e5f:0x5e2b8c9c0f9a2e6e!5m2!4m1!1i2!8m2!3d52.338779!4d16.517316!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['c'].hotels[0] = { name: 'Hotel BoniFaCio Spa & Sport Resort', desc: 'Położony wśród lasów niedaleko Warszawy...', priceSingle: 'ok. 10 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 358 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+BoniFaCio+SPA+%26+SPORT+Resort/@52.54523,20.59827,17z/data=!3m1!4b1!4m9!3m8!1s0x471c998782a1738d:0x39a099a918f50c0c!5m2!4m1!1i2!8m2!3d52.54523!4d20.59827!16s%2Fg%2F1tf7w4y9?entry=ttu' };
+        hotelData['c'].hotels[1] = { name: 'Fabryka Wełny Hotel & Spa, Pabianice', desc: 'Unikalny hotel w zrewitalizowanych wnętrzach fabrycznych...', priceSingle: 'ok. 8 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 288 PLN', googleMapsLink: 'https://www.google.com/maps/place/Fabryka+We%C5%82ny+Hotel+%26+Spa/@51.6678,19.3621,17z/data=!3m1!4b1!4m9!3m8!1s0x471bc6002f2d919d:0x51c70e281d3f9f9d!5m2!4m1!1i2!8m2!3d51.6678!4d19.3621!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['e'].hotels[0] = { name: 'Hotel Król Kazimierz, Kazimierz Dolny', desc: 'Stylowy hotel z widokiem na Wisłę...', priceSingle: 'ok. 9 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 333 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Krol+Kazimierz/@51.320496,21.944211,17z/data=!3m1!4b1!4m9!3m8!1s0x471842e2a0f8c87b:0xc1238d2f6f578c7c!5m2!4m1!1i2!8m2!3d51.320496!4d21.944211!16s%2Fg%2F1tdw1v48?entry=ttu' };
+        hotelData['e'].hotels[1] = { name: 'Siedlisko Sobibór, Polesie', desc: 'Kameralne miejsce w sercu Poleskiego Parku Narodowego...', priceSingle: 'ok. 8 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 275 PLN', googleMapsLink: 'https://www.google.com/maps/place/Siedlisko+Sobib%C3%B3r/@51.524823,23.593673,17z/data=!3m1!4b1!4m9!3m8!1s0x4715f2a1b1a7c5c1:0x1b11a5c63d5c58a5!5m2!4m1!1i2!8m2!3d51.524823!4d23.593673!16s%2Fg%2F1tf7w4y9?entry=ttu' };
+        hotelData['sw'].hotels[0] = { name: 'Zamek Kliczków', desc: 'Historyczny zamek otoczony fosą...', priceSingle: 'ok. 10 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 300 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 346 PLN', googleMapsLink: 'https://www.google.com/maps/place/Zamek+Kliczk%C3%B3w/@51.336496,15.434778,17z/data=!3m1!4b1!4m9!3m8!1s0x470c1e8d4a6f9a01:0x867b1b3b1c67d32c!5m2!4m1!1i2!8m2!3d51.336496!4d15.434778!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['sw'].hotels[1] = { name: 'Hotel Polanica Resort & Spa, Polanica-Zdrój', desc: 'Nowoczesny obiekt w znanym uzdrowisku...', priceSingle: 'ok. 9 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 308 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Polanica+Resort+%26+Spa/@50.413233,16.516858,17z/data=!3m1!4b1!4m9!3m8!1s0x471d2b7d4d4f826d:0x347c09d57a2c7e0e!5m2!4m1!1i2!8m2!3d50.413233!4d16.516858!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['s'].hotels[0] = { name: 'Hotel Aries & Spa, Zakopane', desc: 'Luksusowy hotel w samym sercu Krupówek...', priceSingle: 'ok. 12 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 408 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Aries+%26+Spa+Zakopane/@49.297491,19.95758,17z/data=!3m1!4b1!4m9!3m8!1s0x4715f2a1b1a7c5c1:0x1b11a5c63d5c58a5!5m2!4m1!1i2!8m2!3d49.297491!4d19.95758!16s%2Fg%2F1tdw1v48?entry=ttu' };
+        hotelData['s'].hotels[1] = { name: 'Poziom 511 Design Hotel & Spa, Jura', desc: 'Nowoczesny hotel wkomponowany w skały...', priceSingle: 'ok. 10 700 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 367 PLN', googleMapsLink: 'https://www.google.com/maps/place/Poziom+511+Design+Hotel+%26+Spa/@50.451368,19.553227,17z/data=!3m1!4b1!4m9!3m8!1s0x471bd75a9e3f3d61:0x4101e9167e452932!5m2!4m1!1i2!8m2!3d50.451368!4d19.553227!16s%2Fg%2F1tf7w4y9?entry=ttu' };
+        hotelData['se'].hotels[0] = { name: 'Hotel Arłamów, Bieszczady', desc: 'Ogromny kompleks z niezliczonymi atrakcjami...', priceSingle: 'ok. 11 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 379 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Ar%C5%82am%C3%B3w/@49.525501,22.757134,17z/data=!3m1!4b1!4m9!3m8!1s0x473c4d5b2c7f5c5b:0x51c70e281d3f9f9d!5m2!4m1!1i2!8m2!3d49.525501!4d22.757134!16s%2Fg%2F1tj7g24z?entry=ttu' };
+        hotelData['se'].hotels[1] = { name: 'Hotel Bristol Tradition & Luxury, Rzeszów', desc: 'Elegancki hotel w centrum Rzeszowa...', priceSingle: 'ok. 8 900 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 300 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Bristol+Tradition+%26+Luxury/@50.04369,21.99616,17z/data=!3m1!4b1!4m9!3m8!1s0x473c3b0f5b4b5e5d:0x2c6f6e87d1c6f9e2!5m2!4m1!1i2!8m2!3d50.04369!4d21.99616!16s%2Fg%2F1tdw1v48?entry=ttu' };
+        
+        // Zmienne globalne z Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const RESET_CODE = '632';
+
+        // Inicjalizacja Firebase i Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        const authStatusEl = document.getElementById('auth-status');
+        let userId = null;
+
+        // Słuchacz zmian stanu autoryzacji
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                authStatusEl.textContent = `Połączono. Twój identyfikator: ${userId}`;
+                // Uruchomienie listenerów po autoryzacji
+                listenForPollOptions();
+                listenForRegionVotes();
+                listenForWeekendVotes();
+                listenForPriceVotes();
+            } else {
+                userId = null;
+                // Logowanie anonimowe, jeśli token nie jest dostępny
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } catch (e) {
+                        console.error('Błąd logowania za pomocą tokena:', e);
+                        authStatusEl.textContent = `Błąd autoryzacji: ${e.message}`;
+                    }
+                } else {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error('Błąd logowania anonimowego:', e);
+                        authStatusEl.textContent = `Błąd autoryzacji anonimowej: ${e.message}`;
+                    }
+                }
+            }
+        });
+
+        const gridContainer = document.getElementById('region-grid');
+        const detailsContainer = document.getElementById('details-container');
+        
+        const regionVoteForm = document.getElementById('region-vote-form');
+        const voteRegionButtonsContainer = document.getElementById('vote-region-buttons');
+        const addRegionForm = document.getElementById('add-region-form');
+        const regionVoteMessageEl = document.getElementById('region-vote-message');
+        const addRegionMessageEl = document.getElementById('add-region-message');
+        const regionVoteResultsEl = document.getElementById('region-vote-results');
+        const resetRegionBtn = document.getElementById('reset-region-btn');
+        const regionResetCodeInput = document.getElementById('region-reset-code');
+        const regionResetMessageEl = document.getElementById('region-reset-message');
+
+        const weekendVoteForm = document.getElementById('weekend-vote-form');
+        const voteWeekendButtonsContainer = document.getElementById('vote-weekend-buttons');
+        const addWeekendForm = document.getElementById('add-weekend-form');
+        const weekendVoteMessageEl = document.getElementById('weekend-vote-message');
+        const addWeekendMessageEl = document.getElementById('add-weekend-message');
+        const weekendVoteResultsEl = document.getElementById('weekend-vote-results');
+        const resetWeekendBtn = document.getElementById('reset-weekend-btn');
+        const weekendResetCodeInput = document.getElementById('weekend-reset-code');
+        const weekendResetMessageEl = document.getElementById('weekend-reset-message');
+        
+        const priceVoteForm = document.getElementById('price-vote-form');
+        const votePriceButtonsContainer = document.getElementById('vote-price-buttons');
+        const addPriceForm = document.getElementById('add-price-form');
+        const priceVoteMessageEl = document.getElementById('price-vote-message');
+        const addPriceMessageEl = document.getElementById('add-price-message');
+        const priceVoteResultsEl = document.getElementById('price-vote-results');
+        const resetPriceBtn = document.getElementById('reset-price-btn');
+        const priceResetCodeInput = document.getElementById('price-reset-code');
+        const priceResetMessageEl = document.getElementById('price-reset-message');
+        
+        const allPolls = {
+            region: { options: regionOptions, container: voteRegionButtonsContainer, key: 'regions', voterNameInput: 'voter-name-region', voteMessageEl: 'region-vote-message', resultsEl: 'region-vote-results' },
+            weekend: { options: weekendDates, container: voteWeekendButtonsContainer, key: 'weekends', voterNameInput: 'voter-name-weekend', voteMessageEl: 'weekend-vote-message', resultsEl: 'weekend-vote-results' },
+            price: { options: priceRanges, container: votePriceButtonsContainer, key: 'prices', voterNameInput: 'voter-name-price', voteMessageEl: 'price-vote-message', resultsEl: 'price-vote-results' }
+        };
+
+        function renderGrid() {
+            Object.keys(hotelData).forEach(key => {
+                const region = hotelData[key];
+                const button = document.createElement('button');
+                button.className = 'region-btn text-sm sm:text-base font-semibold p-4 sm:p-6 rounded-lg border-2 border-stone-200 bg-stone-50 hover:bg-stone-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400';
+                button.textContent = region.name;
+                button.dataset.regionKey = key;
+                gridContainer.appendChild(button);
+            });
+        }
+        
+        function renderVoteButtons(options, container, key) {
+            container.innerHTML = '';
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `${key}-btn text-sm sm:text-base font-semibold p-2 rounded-lg border-2 border-stone-200 bg-stone-50 hover:bg-blue-600 hover:text-white transition-colors duration-200`;
+                button.textContent = option;
+                button.dataset[key] = option;
+                container.appendChild(button);
+            });
+        }
+
+        function displayRegionDetails(regionKey) {
+            const region = hotelData[regionKey];
+            if (!region) return;
+
+            detailsContainer.innerHTML = '';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'fade-in';
+            
+            const header = document.createElement('h2');
+            header.className = 'text-3xl font-bold text-center text-stone-700 mb-6';
+            header.textContent = `Propozycje dla regionu: ${region.name}`;
+            wrapper.appendChild(header);
+
+            const hotelsGrid = document.createElement('div');
+            hotelsGrid.className = 'grid md:grid-cols-2 gap-6';
+
+            region.hotels.forEach(hotel => {
+                const card = `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+                        <h3 class="text-xl font-bold text-blue-600 mb-2">${hotel.name}</h3>
+                        <p class="text-stone-600 mb-4 flex-grow">${hotel.desc}</p>
+                        <div class="mt-auto pt-4 border-t border-stone-200">
+                            <h4 class="font-semibold text-stone-700 mb-2">Szacunkowy koszt pobytu (12 os. / 2 noce):</h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between bg-stone-50 p-3 rounded-lg">
+                                    <span class="text-sm text-stone-600">Opcja 1 (pokoje 1-os.):</span>
+                                    <span class="font-bold text-blue-500">${hotel.priceSingle}</span>
+                                </div>
+                                <div class="flex items-center justify-between bg-stone-50 p-3 rounded-lg">
+                                    <span class="text-sm text-stone-600">Opcja 2 (pokoje 2-os.):</span>
+                                    <span class="font-bold text-green-600">${hotel.priceDouble}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <span class="text-sm text-stone-600 font-semibold">Cena za osobę/noc:</span>
+                                <span class="font-bold text-red-500">${hotel.pricePerPerson}</span>
+                            </div>
+                            <a href="${hotel.googleMapsLink}" target="_blank" class="flex items-center justify-center mt-4 text-blue-600 hover:text-blue-800 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-1">
+                                    <path d="M12 12a3 3 0 100-6 3 3 0 000 6z" />
+                                    <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm0 14.25a4.5 4.5 0 100-9 4.5 4.5 0 000 9z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Zobacz na mapie</span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                hotelsGrid.innerHTML += card;
+            });
+            
+            wrapper.appendChild(hotelsGrid);
+            detailsContainer.appendChild(wrapper);
+        }
+        
+        function updateVoteResults(votes, options, resultContainer, keyType) {
+            if (!options || options.length === 0) {
+                 resultContainer.innerHTML = '<p class="text-center text-stone-500">Brak dostępnych opcji do głosowania.</p>';
+                 return;
+            }
+            if (votes.length === 0) {
+                resultContainer.innerHTML = '<p class="text-center text-stone-500">Brak oddanych głosów. Bądź pierwszy!</p>';
+                return;
+            }
+            
+            const results = {};
+            options.forEach(option => {
+                results[option] = { count: 0, voters: new Set() };
+            });
+
+            votes.forEach(voteDoc => {
+                const voterName = voteDoc.name;
+                const votedOptions = voteDoc[keyType] || [];
+                votedOptions.forEach(option => {
+                    if (results[option]) {
+                        results[option].count++;
+                        results[option].voters.add(voterName);
+                    }
+                });
+            });
+
+            const sortedResults = Object.entries(results).sort(([, a], [, b]) => b.count - a.count);
+            const totalVotesCount = votes.length;
+            
+            resultContainer.innerHTML = sortedResults.map(([option, data]) => {
+                const voterList = Array.from(data.voters).join(', ');
+                const percentage = totalVotesCount > 0 ? (data.count / totalVotesCount * 100) : 0;
+                return `
+                    <div class="mb-4 last:mb-0">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-stone-700">${option} (${data.count} głosów)</span>
+                        </div>
+                        <p class="text-sm text-stone-500">Głosy: ${voterList}</p>
+                        <div class="h-2 mt-1 bg-blue-200 rounded-full">
+                            <div class="h-full bg-blue-600 rounded-full" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function getOptionsFromFirestore(collectionName) {
+            const optionsRef = doc(db, `artifacts/${appId}/public/data/poll_options`, collectionName);
+            const optionsSnap = await getDoc(optionsRef);
+            return optionsSnap.exists() ? optionsSnap.data().items.sort() : [];
+        }
+        
+        // Funkcja do inicjalizacji listenerów dla opcji ankiet
+        function listenForPollOptions() {
+            const pollOptionsDocRef = doc(db, `artifacts/${appId}/public/data/poll_options`, 'regions');
+            onSnapshot(pollOptionsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    regionOptions = docSnap.data().items;
+                }
+                renderVoteButtons(regionOptions, voteRegionButtonsContainer, 'region');
+            }, (error) => { console.error("Błąd podczas pobierania opcji regionów: ", error); });
+
+            const weekendOptionsDocRef = doc(db, `artifacts/${appId}/public/data/poll_options`, 'weekends');
+            onSnapshot(weekendOptionsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    weekendDates = docSnap.data().items;
+                }
+                renderVoteButtons(weekendDates, voteWeekendButtonsContainer, 'weekend');
+            }, (error) => { console.error("Błąd podczas pobierania opcji terminów: ", error); });
+            
+            const priceOptionsDocRef = doc(db, `artifacts/${appId}/public/data/poll_options`, 'prices');
+            onSnapshot(priceOptionsDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    priceRanges = docSnap.data().items;
+                }
+                renderVoteButtons(priceRanges, votePriceButtonsContainer, 'price');
+            }, (error) => { console.error("Błąd podczas pobierania opcji cen: ", error); });
+        }
+        
+        function listenForRegionVotes() {
+            if (!userId) {
+                console.error("Autoryzacja nie gotowa. Nie można nasłuchiwać głosów na region.");
+                return;
+            }
+            const votesCollectionPath = `artifacts/${appId}/public/data/region_votes`;
+            const q = query(collection(db, votesCollectionPath));
+            
+            onSnapshot(q, (snapshot) => {
+                const votes = [];
+                snapshot.forEach((doc) => {
+                    votes.push(doc.data());
+                });
+                const currentRegions = Array.from(document.querySelectorAll('#vote-region-buttons button')).map(btn => btn.textContent);
+                updateVoteResults(votes, currentRegions, regionVoteResultsEl, 'regions');
+            }, (error) => {
+                console.error("Błąd podczas pobierania głosów na region w czasie rzeczywistym: ", error);
+            });
+        }
+        
+        function listenForWeekendVotes() {
+            if (!userId) {
+                console.error("Autoryzacja nie gotowa. Nie można nasłuchiwać głosów na termin.");
+                return;
+            }
+            const votesCollectionPath = `artifacts/${appId}/public/data/weekend_votes`;
+            const q = query(collection(db, votesCollectionPath));
+
+            onSnapshot(q, (snapshot) => {
+                const votes = [];
+                snapshot.forEach((doc) => {
+                    votes.push(doc.data());
+                });
+                const currentWeekends = Array.from(document.querySelectorAll('#vote-weekend-buttons button')).map(btn => btn.textContent);
+                updateVoteResults(votes, currentWeekends, weekendVoteResultsEl, 'weekends');
+            }, (error) => {
+                console.error("Błąd podczas pobierania głosów na termin w czasie rzeczywistym: ", error);
+            });
+        }
+        
+        function listenForPriceVotes() {
+            if (!userId) {
+                console.error("Autoryzacja nie gotowa. Nie można nasłuchiwać głosów na cenę.");
+                return;
+            }
+            const votesCollectionPath = `artifacts/${appId}/public/data/price_votes`;
+            const q = query(collection(db, votesCollectionPath));
+
+            onSnapshot(q, (snapshot) => {
+                const votes = [];
+                snapshot.forEach((doc) => {
+                    votes.push(doc.data());
+                });
+                const currentPrices = Array.from(document.querySelectorAll('#vote-price-buttons button')).map(btn => btn.textContent);
+                updateVoteResults(votes, currentPrices, priceVoteResultsEl, 'prices');
+            }, (error) => {
+                console.error("Błąd podczas pobierania głosów na cenę w czasie rzeczywistym: ", error);
+            });
+        }
+
+        async function resetPoll(collectionPath, messageElement) {
+            if (!userId) {
+                messageElement.textContent = 'Błąd: Użytkownik nie jest autoryzowany.';
+                messageElement.classList.add('text-red-600');
+                return;
+            }
+            
+            try {
+                const q = query(collection(db, collectionPath));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    messageElement.textContent = 'Ankieta jest już pusta.';
+                    messageElement.classList.remove('text-red-600');
+                    messageElement.classList.add('text-green-600');
+                    return;
+                }
+
+                const batch = writeBatch(db);
+                querySnapshot.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+
+                await batch.commit();
+                messageElement.textContent = 'Ankieta została pomyślnie zresetowana.';
+                messageElement.classList.remove('text-red-600');
+                messageElement.classList.add('text-green-600');
+
+                document.querySelectorAll('.vote-btn, .date-btn, .price-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+            } catch (e) {
+                console.error("Błąd podczas resetowania ankiety: ", e);
+                messageElement.textContent = 'Wystąpił błąd podczas resetowania ankiety. Spróbuj ponownie.';
+                messageElement.classList.remove('text-green-600');
+                messageElement.classList.add('text-red-600');
+            }
+        }
+
+        gridContainer.addEventListener('click', (event) => {
+            const target = event.target.closest('.region-btn');
+            if (!target) return;
+
+            const regionKey = target.dataset.regionKey;
+            
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            target.classList.add('active');
+
+            displayRegionDetails(regionKey);
+        });
+        
+        voteRegionButtonsContainer.addEventListener('click', (event) => {
+            const target = event.target.closest('.region-btn');
+            if (!target) return;
+            target.classList.toggle('active');
+        });
+
+        voteWeekendButtonsContainer.addEventListener('click', (event) => {
+            const target = event.target.closest('.weekend-btn');
+            if (!target) return;
+            target.classList.toggle('active');
+        });
+        
+        votePriceButtonsContainer.addEventListener('click', (event) => {
+            const target = event.target.closest('.price-btn');
+            if (!target) return;
+            target.classList.toggle('active');
+        });
+
+        async function getVoterDocRef(collectionPath, voterName) {
+            if (!voterName) return null;
+            const q = query(collection(db, collectionPath), where("name", "==", voterName.trim()));
+            const querySnapshot = await getDocs(q);
+            return !querySnapshot.empty ? querySnapshot.docs[0].ref : null;
+        }
+
+        regionVoteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const voterName = document.getElementById('voter-name-region').value.trim();
+            if (!voterName) {
+                regionVoteMessageEl.textContent = 'Proszę wprowadzić swoje imię.';
+                regionVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                regionVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            const selectedButtons = document.querySelectorAll('#vote-region-buttons .region-btn.active');
+            const selectedRegions = Array.from(selectedButtons).map(btn => btn.textContent);
+            
+            if (selectedRegions.length === 0) {
+                regionVoteMessageEl.textContent = 'Proszę wybrać przynajmniej jeden region, na który chcesz zagłosować.';
+                regionVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                regionVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            if (!userId) {
+                regionVoteMessageEl.textContent = 'Błąd: Użytkownik nie jest autoryzowany. Spróbuj odświeżyć stronę.';
+                regionVoteMessageEl.classList.remove('text-green-600');
+                regionVoteMessageEl.classList.add('text-red-600');
+                return;
+            }
+            
+            const votesCollectionPath = `artifacts/${appId}/public/data/region_votes`;
+            const voterDocRef = await getVoterDocRef(votesCollectionPath, voterName);
+            
+            try {
+                const voteData = {
+                    name: voterName,
+                    regions: selectedRegions,
+                    timestamp: serverTimestamp()
+                };
+
+                if (voterDocRef) {
+                    await setDoc(voterDocRef, voteData);
+                    regionVoteMessageEl.textContent = `Twój głos został zaktualizowany, ${voterName}!`;
+                } else {
+                    await addDoc(collection(db, votesCollectionPath), voteData);
+                    regionVoteMessageEl.textContent = `Twój głos został pomyślnie wysłany, ${voterName}!`;
+                }
+                
+                regionVoteMessageEl.classList.remove('text-orange-500', 'text-red-600');
+                regionVoteMessageEl.classList.add('text-green-600');
+                document.querySelectorAll('.region-btn').forEach(btn => btn.classList.remove('active'));
+
+            } catch (e) {
+                console.error("Błąd podczas dodawania/aktualizacji głosu na region: ", e);
+                regionVoteMessageEl.textContent = 'Wystąpił błąd. Spróbuj ponownie.';
+                regionVoteMessageEl.classList.remove('text-green-600', 'text-orange-500');
+                regionVoteMessageEl.classList.add('text-red-600');
+            }
+        });
+
+        weekendVoteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const voterName = document.getElementById('voter-name-weekend').value.trim();
+            if (!voterName) {
+                weekendVoteMessageEl.textContent = 'Proszę wprowadzić swoje imię.';
+                weekendVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                weekendVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            const selectedButtons = document.querySelectorAll('#vote-weekend-buttons .weekend-btn.active');
+            const selectedWeekends = Array.from(selectedButtons).map(btn => btn.textContent);
+
+            if (selectedWeekends.length === 0) {
+                weekendVoteMessageEl.textContent = 'Proszę wybrać przynajmniej jeden termin, na który chcesz głosować.';
+                weekendVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                weekendVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            if (!userId) {
+                weekendVoteMessageEl.textContent = 'Błąd: Użytkownik nie jest autoryzowany. Spróbuj odświeżyć stronę.';
+                weekendVoteMessageEl.classList.remove('text-green-600');
+                weekendVoteMessageEl.classList.add('text-red-600');
+                return;
+            }
+
+            const votesCollectionPath = `artifacts/${appId}/public/data/weekend_votes`;
+            const voterDocRef = await getVoterDocRef(votesCollectionPath, voterName);
+
+            try {
+                const voteData = {
+                    name: voterName,
+                    weekends: selectedWeekends,
+                    timestamp: serverTimestamp()
+                };
+
+                if (voterDocRef) {
+                    await setDoc(voterDocRef, voteData);
+                    weekendVoteMessageEl.textContent = `Twój głos został zaktualizowany, ${voterName}!`;
+                } else {
+                    await addDoc(collection(db, votesCollectionPath), voteData);
+                    weekendVoteMessageEl.textContent = `Twój głos został pomyślnie wysłany, ${voterName}!`;
+                }
+                
+                weekendVoteMessageEl.classList.remove('text-orange-500', 'text-red-600');
+                weekendVoteMessageEl.classList.add('text-green-600');
+                document.querySelectorAll('.weekend-btn').forEach(btn => btn.classList.remove('active'));
+            } catch (e) {
+                console.error("Błąd podczas dodawania/aktualizacji głosu na termin: ", e);
+                weekendVoteMessageEl.textContent = 'Wystąpił błąd. Spróbuj ponownie.';
+                weekendVoteMessageEl.classList.remove('text-green-600', 'text-orange-500');
+                weekendVoteMessageEl.classList.add('text-red-600');
+            }
+        });
+        
+        priceVoteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const voterName = document.getElementById('voter-name-price').value.trim();
+            if (!voterName) {
+                priceVoteMessageEl.textContent = 'Proszę wprowadzić swoje imię.';
+                priceVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                priceVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            const selectedButtons = document.querySelectorAll('#vote-price-buttons .price-btn.active');
+            const selectedPrices = Array.from(selectedButtons).map(btn => btn.textContent);
+
+            if (selectedPrices.length === 0) {
+                priceVoteMessageEl.textContent = 'Proszę wybrać przynajmniej jeden przedział cenowy, na który chcesz zagłosować.';
+                priceVoteMessageEl.classList.remove('text-green-600', 'text-red-600');
+                priceVoteMessageEl.classList.add('text-orange-500');
+                return;
+            }
+
+            if (!userId) {
+                priceVoteMessageEl.textContent = 'Błąd: Użytkownik nie jest autoryzowany. Spróbuj odświeżyć stronę.';
+                priceVoteMessageEl.classList.remove('text-green-600');
+                priceVoteMessageEl.classList.add('text-red-600');
+                return;
+            }
+
+            const votesCollectionPath = `artifacts/${appId}/public/data/price_votes`;
+            const voterDocRef = await getVoterDocRef(votesCollectionPath, voterName);
+
+            try {
+                const voteData = {
+                    name: voterName,
+                    prices: selectedPrices,
+                    timestamp: serverTimestamp()
+                };
+
+                if (voterDocRef) {
+                    await setDoc(voterDocRef, voteData);
+                    priceVoteMessageEl.textContent = `Twój głos został zaktualizowany, ${voterName}!`;
+                } else {
+                    await addDoc(collection(db, votesCollectionPath), voteData);
+                    priceVoteMessageEl.textContent = `Twój głos został pomyślnie wysłany, ${voterName}!`;
+                }
+                
+                priceVoteMessageEl.classList.remove('text-orange-500', 'text-red-600');
+                priceVoteMessageEl.classList.add('text-green-600');
+                document.querySelectorAll('.price-btn').forEach(btn => btn.classList.remove('active'));
+            } catch (e) {
+                console.error("Błąd podczas dodawania/aktualizacji głosu na cenę: ", e);
+                priceVoteMessageEl.textContent = 'Wystąpił błąd. Spróbuj ponownie.';
+                priceVoteMessageEl.classList.remove('text-green-600', 'text-orange-500');
+                priceVoteMessageEl.classList.add('text-red-600');
+            }
+        });
+
+        // Event Listeners dla przycisków resetowania
+        resetRegionBtn.addEventListener('click', () => {
+            const enteredCode = regionResetCodeInput.value;
+            if (enteredCode === RESET_CODE) {
+                regionResetMessageEl.textContent = '';
+                resetPoll(`artifacts/${appId}/public/data/region_votes`, regionResetMessageEl);
+            } else {
+                regionResetMessageEl.textContent = 'Nieprawidłowy kod resetujący.';
+                regionResetMessageEl.classList.add('text-red-600');
+            }
+        });
+
+        resetWeekendBtn.addEventListener('click', () => {
+            const enteredCode = weekendResetCodeInput.value;
+            if (enteredCode === RESET_CODE) {
+                weekendResetMessageEl.textContent = '';
+                resetPoll(`artifacts/${appId}/public/data/weekend_votes`, weekendResetMessageEl);
+            } else {
+                weekendResetMessageEl.textContent = 'Nieprawidłowy kod resetujący.';
+                weekendResetMessageEl.classList.add('text-red-600');
+            }
+        });
+
+        resetPriceBtn.addEventListener('click', () => {
+            const enteredCode = priceResetCodeInput.value;
+            if (enteredCode === RESET_CODE) {
+                priceResetMessageEl.textContent = '';
+                resetPoll(`artifacts/${appId}/public/data/price_votes`, priceResetMessageEl);
+            } else {
+                priceResetMessageEl.textContent = 'Nieprawidłowy kod resetujący.';
+                priceResetMessageEl.classList.add('text-red-600');
+            }
+        });
+        
+        async function addPollOption(collectionName, newOption, messageEl) {
+            if (!newOption) {
+                messageEl.textContent = 'Proszę podać opcję do dodania.';
+                messageEl.classList.remove('text-green-600');
+                messageEl.classList.add('text-red-600');
+                return;
+            }
+            if (!userId) {
+                messageEl.textContent = 'Błąd: Użytkownik nie jest autoryzowany.';
+                messageEl.classList.remove('text-green-600');
+                messageEl.classList.add('text-red-600');
+                return;
+            }
+
+            const optionsDocRef = doc(db, `artifacts/${appId}/public/data/poll_options`, collectionName);
+            try {
+                const docSnap = await getDoc(optionsDocRef);
+                let currentItems = docSnap.exists() ? docSnap.data().items : [];
+
+                if (currentItems.includes(newOption)) {
+                    messageEl.textContent = `Ta opcja (${newOption}) już istnieje.`;
+                    messageEl.classList.remove('text-green-600');
+                    messageEl.classList.add('text-red-600');
+                    return;
+                }
+                
+                currentItems.push(newOption);
+                await setDoc(optionsDocRef, { items: currentItems.sort() });
+                messageEl.textContent = `Opcja "${newOption}" została dodana pomyślnie.`;
+                messageEl.classList.remove('text-red-600');
+                messageEl.classList.add('text-green-600');
+
+            } catch (e) {
+                console.error("Błąd podczas dodawania opcji: ", e);
+                messageEl.textContent = 'Wystąpił błąd podczas dodawania opcji. Spróbuj ponownie.';
+                messageEl.classList.remove('text-green-600');
+                messageEl.classList.add('text-red-600');
+            }
+        }
+        
+        addRegionForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newRegionName = document.getElementById('new-region-name').value.trim();
+            addPollOption('regions', newRegionName, addRegionMessageEl);
+        });
+
+        addWeekendForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newWeekendName = document.getElementById('new-weekend-name').value.trim();
+            addPollOption('weekends', newWeekendName, addWeekendMessageEl);
+        });
+
+        addPriceForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const newPriceName = document.getElementById('new-price-name').value.trim();
+            addPollOption('prices', newPriceName, addPriceMessageEl);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGrid();
+            renderVoteButtons(regionOptions, voteRegionButtonsContainer, 'region');
+            renderVoteButtons(weekendDates, voteWeekendButtonsContainer, 'weekend');
+            renderVoteButtons(priceRanges, votePriceButtonsContainer, 'price');
+        });
+    </script>
+</body>
+</html>
