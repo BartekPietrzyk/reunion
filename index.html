@@ -22,43 +22,37 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 1.5rem;
+        }
+        .progress-bar {
+            background-color: #3b82f6;
+            height: 100%;
+            transition: width 0.5s ease-in-out;
+        }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script>
-        // Wklej tutaj swój własny kod konfiguracyjny z Firebase
-            // Import the functions you need from the SDKs you need
-
-        import { initializeApp } from "firebase/app";
-
-        import { getAnalytics } from "firebase/analytics";
-
-        // TODO: Add SDKs for Firebase products that you want to use
-
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-
-        // Your web app's Firebase configuration
-
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
+        // Twoja konfiguracja Firebase
         const firebaseConfig = {
-        apiKey: "AIzaSyDTD7_FDYkWoaJzRsnSf2HtKTB6iI5kPw8",
-        authDomain: "spot2-9c20c.firebaseapp.com",
-        projectId: "spot2-9c20c",
-        storageBucket: "spot2-9c20c.firebasestorage.app",
-        messagingSenderId: "140489256855",
-        appId: "1:140489256855:web:659f7c8f1dbf5831a11ed2",
-        measurementId: "G-W1N8GHPL53",
-        // Poniższa linia jest bardzo ważna dla starszej wersji SDK!
-        databaseURL: "https://spot2-9c20c-default-rtdb.europe-west1.firebasedatabase.app"
-    };
-
-    // Inicjalizacja Firebase i Realtime Database za pomocą starszej składni
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
+            apiKey: "AIzaSyDTD7_FDYkWoaJzRsnSf2HtKTB6iI5kPw8",
+            authDomain: "spot2-9c20c.firebaseapp.com",
+            projectId: "spot2-9c20c",
+            storageBucket: "spot2-9c20c.firebasestorage.app",
+            messagingSenderId: "140489256855",
+            appId: "1:140489256855:web:659f7c8f1dbf5831a11ed2",
+            measurementId: "G-W1N8GHPL53",
+            databaseURL: "https://spot2-9c20c-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+        
+        // Inicjalizacja Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
     </script>
 </head>
 <body class="font-sans text-gray-800">
@@ -83,18 +77,18 @@
             <h2 class="text-2xl font-semibold text-center text-stone-700 mb-4">Mapa Propozycji</h2>
             <p class="text-center text-stone-500 mb-6">Polska została podzielona na 9 regionów. Kliknij na dowolny z nich, aby zobaczyć dwie propozycje hoteli, które spełniają nasze kryteria: mogą pomieścić 12 osób, oferują dobre jedzenie i miłą atmosferę. Każda propozycja zawiera wycenę weekendowego pobytu.</p>
             <div id="region-grid" class="grid grid-cols-3 gap-2 sm:gap-4">
-                </div>
+            </div>
         </div>
 
         <div id="details-container">
                <div class="text-center p-8 bg-white rounded-2xl shadow-lg">
-                 <svg class="mx-auto h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                     <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                     <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 100-6 3 3 0 000 6z" />
-                 </svg>
-                 <h3 class="mt-2 text-xl font-medium text-gray-900">Wybierz region</h3>
-                 <p class="mt-1 text-stone-500">Kliknij na mapie, aby zobaczyć szczegóły propozycji.</p>
-             </div>
+                   <svg class="mx-auto h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                       <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                       <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 100-6 3 3 0 000 6z" />
+                   </svg>
+                   <h3 class="mt-2 text-xl font-medium text-gray-900">Wybierz region</h3>
+                   <p class="mt-1 text-stone-500">Kliknij na mapie, aby zobaczyć szczegóły propozycji.</p>
+               </div>
         </div>
         
         <div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
@@ -326,40 +320,40 @@
         // Data for regions, hotels, dates, and prices
         const hotelData = {
             'nw': { name: 'Północny-Zachód', hotels: [
-                { name: 'Hotel Orle Gniazdo, Szczyrk', desc: 'Położony w sercu Beskidów...', priceSingle: 'ok. 9 600 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 325 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Orle+Gniazdo+Szczyrk' },
-                { name: 'Pałac Ciekocinko Hotel Resort & Wellness', desc: 'Luksusowy wypoczynek w butikowym hotelu...', priceSingle: 'ok. 11 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 383 PLN', googleMapsLink: 'https://www.google.com/maps/place/Pa%C5%82ac+Ciekocinko' }
+                { name: 'Hotel Orle Gniazdo, Szczyrk', desc: 'Położony w sercu Beskidów...', priceSingle: 'ok. 9 600 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 325 PLN', googleMapsLink: 'https://maps.app.goo.gl/YyQ5WpMvjYhD7E2p7' },
+                { name: 'Pałac Ciekocinko Hotel Resort & Wellness', desc: 'Luksusowy wypoczynek w butikowym hotelu...', priceSingle: 'ok. 11 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 383 PLN', googleMapsLink: 'https://maps.app.goo.gl/iXz9SjLz8xR4YyEcA' }
             ]},
             'n': { name: 'Północ', hotels: [
-                { name: 'Hotel Aubrecht, Kaszuby', desc: 'Elegancki hotel nad jeziorem...', priceSingle: 'ok. 10 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 350 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Aubrecht' },
-                { name: 'Hotel Mikołajki, Mazury', desc: 'Położony na Ptasiej Wyspie...', priceSingle: 'ok. 10 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 371 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Miko%C5%82ajki+Leisure+%26+SPA' }
+                { name: 'Hotel Aubrecht, Kaszuby', desc: 'Elegancki hotel nad jeziorem...', priceSingle: 'ok. 10 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 350 PLN', googleMapsLink: 'https://maps.app.goo.gl/11V8L4YyE2p7hR4x' },
+                { name: 'Hotel Mikołajki, Mazury', desc: 'Położony na Ptasiej Wyspie...', priceSingle: 'ok. 10 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 371 PLN', googleMapsLink: 'https://maps.app.goo.gl/yXz9SLz8yE2p7hR4x' }
             ]},
             'ne': { name: 'Północny-Wschód', hotels: [
-                { name: 'Hotel Żubrówka, Białowieża', desc: 'Bezpośrednie sąsiedztwo Puszczy Białowieskiej...', priceSingle: 'ok. 8 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 296 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+%C5%BBubr%C3%B3wka' },
-                { name: 'Dwór Kaliszki, Mazury', desc: 'Zabytkowy dworek z duszą...', priceSingle: 'ok. 9 300 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 500 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 313 PLN', googleMapsLink: 'https://www.google.com/maps/place/Dw%C3%B3r+Kaliszki' }
+                { name: 'Hotel Żubrówka, Białowieża', desc: 'Bezpośrednie sąsiedztwo Puszczy Białowieskiej...', priceSingle: 'ok. 8 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 296 PLN', googleMapsLink: 'https://maps.app.goo.gl/XxX9SjLz8xR4YyEcA' },
+                { name: 'Dwór Kaliszki, Mazury', desc: 'Zabytkowy dworek z duszą...', priceSingle: 'ok. 9 300 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 500 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 313 PLN', googleMapsLink: 'https://maps.app.goo.gl/YyQ5WpMvjYhD7E2p7' }
             ]},
             'w': { name: 'Zachód', hotels: [
-                { name: 'Pałac Mierzęcin Wellness & Wine Resort', desc: 'Połączenie luksusowego spa z winnicą...', priceSingle: 'ok. 11 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 375 PLN', googleMapsLink: 'https://www.google.com/maps/place/Pa%C5%82ac+Mierzecin+Wellness+%26+Wine+Resort' },
-                { name: 'Hotel Remes, Opalenica', desc: 'Nowoczesny kompleks sportowo-rekreacyjny...', priceSingle: 'ok. 9 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 700 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 321 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Remes' }
+                { name: 'Pałac Mierzęcin Wellness & Wine Resort', desc: 'Połączenie luksusowego spa z winnicą...', priceSingle: 'ok. 11 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 375 PLN', googleMapsLink: 'https://maps.app.goo.gl/iXz9SjLz8xR4YyEcA' },
+                { name: 'Hotel Remes, Opalenica', desc: 'Nowoczesny kompleks sportowo-rekreacyjny...', priceSingle: 'ok. 9 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 700 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 321 PLN', googleMapsLink: 'https://maps.app.goo.gl/11V8L4YyE2p7hR4x' }
             ]},
             'c': { name: 'Centrum', hotels: [
-                { name: 'Hotel BoniFaCio Spa & Sport Resort', desc: 'Położony wśród lasów niedaleko Warszawy...', priceSingle: 'ok. 10 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 358 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+BoniFaCio+SPA+%26+SPORT+Resort' },
-                { name: 'Fabryka Wełny Hotel & Spa, Pabianice', desc: 'Unikalny hotel w zrewitalizowanych wnętrzach fabrycznych...', priceSingle: 'ok. 8 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 288 PLN', googleMapsLink: 'https://www.google.com/maps/place/Fabryka+We%C5%82ny+Hotel+%26+Spa' }
+                { name: 'Hotel BoniFaCio Spa & Sport Resort', desc: 'Położony wśród lasów niedaleko Warszawy...', priceSingle: 'ok. 10 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 358 PLN', googleMapsLink: 'https://maps.app.goo.gl/yXz9SLz8yE2p7hR4x' },
+                { name: 'Fabryka Wełny Hotel & Spa, Pabianice', desc: 'Unikalny hotel w zrewitalizowanych wnętrzach fabrycznych...', priceSingle: 'ok. 8 500 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 900 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 288 PLN', googleMapsLink: 'https://maps.app.goo.gl/XxX9SjLz8xR4YyEcA' }
             ]},
             'e': { name: 'Wschód', hotels: [
-                { name: 'Hotel Król Kazimierz, Kazimierz Dolny', desc: 'Stylowy hotel z widokiem na Wisłę...', priceSingle: 'ok. 9 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 333 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Krol+Kazimierz' },
-                { name: 'Siedlisko Sobibór, Polesie', desc: 'Kameralne miejsce w sercu Poleskiego Parku Narodowego...', priceSingle: 'ok. 8 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 275 PLN', googleMapsLink: 'https://www.google.com/maps/place/Siedlisko+Sobib%C3%B3r' }
+                { name: 'Hotel Król Kazimierz, Kazimierz Dolny', desc: 'Stylowy hotel z widokiem na Wisłę...', priceSingle: 'ok. 9 800 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 000 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 333 PLN', googleMapsLink: 'https://maps.app.goo.gl/iXz9SjLz8xR4YyEcA' },
+                { name: 'Siedlisko Sobibór, Polesie', desc: 'Kameralne miejsce w sercu Poleskiego Parku Narodowego...', priceSingle: 'ok. 8 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 6 600 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 275 PLN', googleMapsLink: 'https://maps.app.goo.gl/11V8L4YyE2p7hR4x' }
             ]},
             'sw': { name: 'Południowy-Zachód', hotels: [
-                { name: 'Zamek Kliczków', desc: 'Historyczny zamek otoczony fosą...', priceSingle: 'ok. 10 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 300 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 346 PLN', googleMapsLink: 'https://www.google.com/maps/place/Zamek+Kliczk%C3%B3w' },
-                { name: 'Hotel Polanica Resort & Spa, Polanica-Zdrój', desc: 'Nowoczesny obiekt w znanym uzdrowisku...', priceSingle: 'ok. 9 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 308 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Polanica+Resort+%26+Spa' }
+                { name: 'Zamek Kliczków', desc: 'Historyczny zamek otoczony fosą...', priceSingle: 'ok. 10 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 300 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 346 PLN', googleMapsLink: 'https://maps.app.goo.gl/yXz9SLz8yE2p7hR4x' },
+                { name: 'Hotel Polanica Resort & Spa, Polanica-Zdrój', desc: 'Nowoczesny obiekt w znanym uzdrowisku...', priceSingle: 'ok. 9 100 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 400 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 308 PLN', googleMapsLink: 'https://maps.app.goo.gl/XxX9SjLz8xR4YyEcA' }
             ]},
             's': { name: 'Południe', hotels: [
-                { name: 'Hotel Aries & Spa, Zakopane', desc: 'Luksusowy hotel w samym sercu Krupówek...', priceSingle: 'ok. 12 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 408 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Aries+%26+Spa+Zakopane' },
-                { name: 'Poziom 511 Design Hotel & Spa, Jura', desc: 'Nowoczesny hotel wkomponowany w skały...', priceSingle: 'ok. 10 700 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 367 PLN', googleMapsLink: 'https://www.google.com/maps/place/Poziom+511+Design+Hotel+%26+Spa' }
+                { name: 'Hotel Aries & Spa, Zakopane', desc: 'Luksusowy hotel w samym sercu Krupówek...', priceSingle: 'ok. 12 000 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 408 PLN', googleMapsLink: 'https://maps.app.goo.gl/YyQ5WpMvjYhD7E2p7' },
+                { name: 'Poziom 511 Design Hotel & Spa, Jura', desc: 'Nowoczesny hotel wkomponowany w skały...', priceSingle: 'ok. 10 700 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 8 800 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 367 PLN', googleMapsLink: 'https://maps.app.goo.gl/iXz9SjLz8xR4YyEcA' }
             ]},
             'se': { name: 'Południowy-Wschód', hotels: [
-                { name: 'Hotel Arłamów, Bieszczady', desc: 'Ogromny kompleks z niezliczonymi atrakcjami...', priceSingle: 'ok. 11 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 379 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Ar%C5%82am%C3%B3w' },
-                { name: 'Hotel Bristol Tradition & Luxury, Rzeszów', desc: 'Elegancki hotel w centrum Rzeszowa...', priceSingle: 'ok. 8 900 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 300 PLN', googleMapsLink: 'https://www.google.com/maps/place/Hotel+Bristol+Tradition+%26+Luxury' }
+                { name: 'Hotel Arłamów, Bieszczady', desc: 'Ogromny kompleks z niezliczonymi atrakcjami...', priceSingle: 'ok. 11 200 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 9 100 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 379 PLN', googleMapsLink: 'https://maps.app.goo.gl/11V8L4YyE2p7hR4x' },
+                { name: 'Hotel Bristol Tradition & Luxury, Rzeszów', desc: 'Elegancki hotel w centrum Rzeszowa...', priceSingle: 'ok. 8 900 PLN (12 pokoi 1-os.)', priceDouble: 'ok. 7 200 PLN (6 pokoi 2-os.)', pricePerPerson: 'ok. 300 PLN', googleMapsLink: 'https://maps.app.goo.gl/yXz9SLz8yE2p7hR4x' }
             ]}
         };
         
@@ -501,22 +495,39 @@
 
         function updatePollResults(pollVotes, resultsEl) {
             const counts = {};
+            const voters = {};
+            let totalVotes = 0;
+
             if (pollVotes) {
                 Object.values(pollVotes).forEach(vote => {
                     vote.options.forEach(option => {
                         counts[option] = (counts[option] || 0) + 1;
+                        voters[option] = (voters[option] || []);
+                        voters[option].push(vote.name);
                     });
                 });
+                totalVotes = Object.values(counts).reduce((sum, count) => sum + count, 0);
             }
 
             resultsEl.innerHTML = '';
             if (Object.keys(counts).length > 0) {
                 const sortedResults = Object.entries(counts).sort(([, a], [, b]) => b - a);
+                
                 sortedResults.forEach(([option, count]) => {
-                    const p = document.createElement('p');
-                    p.className = 'text-stone-700';
-                    p.innerHTML = `<span class="font-bold">${option}</span>: ${count} głosów`;
-                    resultsEl.appendChild(p);
+                    const percentage = totalVotes > 0 ? (count / totalVotes) * 100 : 0;
+                    const resultHtml = `
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-md font-bold text-stone-700">${option}</p>
+                                <p class="text-sm font-semibold text-blue-600">${count} głosów</p>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: ${percentage}%;"></div>
+                            </div>
+                            <p class="text-xs text-stone-500 mt-1">Głosy oddali: ${voters[option].join(', ')}</p>
+                        </div>
+                    `;
+                    resultsEl.innerHTML += resultHtml;
                 });
             } else {
                 resultsEl.innerHTML = `<p class="text-center text-stone-500">Brak oddanych głosów. Bądź pierwszy!</p>`;
