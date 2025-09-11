@@ -1,26 +1,10 @@
 {
-  "name": "spotkanie",
+  "name": "hotele",
   "version": "1.0.0",
-  "description": "re",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deploy": "gh-pages -d ."
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/BartekPietrzyk/reunion.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/BartekPietrzyk/reunion/issues"
-  },
-  "homepage": "https://github.com/BartekPietrzyk/reunion#readme",
   "devDependencies": {
-    "gh-pages": "^6.3.0"
-  },
-  "dependencies": {
-    "firebase": "^12.2.1"
+    "gh-pages": "^6.1.1"
   }
 }
